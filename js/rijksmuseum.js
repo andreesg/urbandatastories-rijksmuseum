@@ -56,7 +56,7 @@ rijksmuseum.buildContent = function() {
 rijksmuseum.init = function() {
 	var self = this;
 	var state = history.state;
-	var pathname = window.location.pathname.split(".")[1];
+	var pathname = window.location.pathname.split("/")[1];
 
 	if (state) {
 		this.initialId = state.id;

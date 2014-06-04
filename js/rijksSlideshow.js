@@ -184,9 +184,6 @@ var rijksSlideshow = (function() {
 		// show / hide items
 		$oldItem.css( 'opacity', 0 );
 		$newItem.css( 'opacity', 1 );
-
-		console.log("Remove and add:");
-		console.log(removeAndAdd);
 		
 		if (removeAndAdd) {
 			if (lastLimit < rijksmuseum.content.length) {
@@ -199,17 +196,7 @@ var rijksSlideshow = (function() {
 				}
 			}
 		}
-
-		console.log("Backward:")
-		console.log(navigationsBackward);
-		console.log("Forward");
-		console.log(navigationsForward)
-		console.log("Current");
-		console.log(current);
 		itemsCount = $items.length;
-		console.log("Number of items:");
-		console.log($items.length);
-		console.log($slideshow.find("li").length);
 	}
 
 	function startSlideshow() {
