@@ -58,6 +58,9 @@ rijksmuseum.init = function() {
 	var state = history.state;
 	var pathname = window.location.pathname.split("/")[1];
 
+	console.log(window.location.pathname);
+	console.log(pathname);
+
 	if (state) {
 		this.initialId = state.id;
 	} else if (pathname != "") {
