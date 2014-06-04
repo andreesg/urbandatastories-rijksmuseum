@@ -11,6 +11,9 @@ rijksmuseum.getContentAndInitial = function() {
 		var found = false;
 		for (var i = 0; i < data.artObjects.length; i++) {
 			if (data.artObjects[i].id == self.initialId) {
+				var temp = data.artObjects[0];
+				data.artObjects[0] = data.artObjects[i];
+				data.artObjects[i] = temp;
 				self.content = data.artObjects;
 				self.buildContent();
 				found = true;
@@ -22,6 +25,7 @@ rijksmuseum.getContentAndInitial = function() {
 			var lastContent = data.artObjects;
 			$.getJSON("https://www.rijksmuseum.nl/api/nl/collection/"+self.initialId+"?key="+self.apiKey+"&format=json", function(data) {
 				var initial = data.artObject;
+				self.content = [];
 				self.content.push(initial);
 				self.content.concat(lastContent);
 				self.buildContent();
@@ -57,9 +61,6 @@ rijksmuseum.init = function() {
 	var self = this;
 	var state = history.state;
 	var pathname = window.location.pathname.split("/")[1];
-
-	console.log(window.location.pathname);
-	console.log(pathname);
 
 	if (state) {
 		this.initialId = state.id;
