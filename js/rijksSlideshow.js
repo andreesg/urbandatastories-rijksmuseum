@@ -23,12 +23,12 @@ var rijksSlideshow = (function() {
 		slideshowtime,
 		itemsCount,
 		isSlideshowActive = true,
-		middleLimit = 10,
+		middleLimit = 9,
 		removeAndAdd = false,
 		lastLimit = 20,
 		interval = 3500;
 
-	function loadMoreItems(quantity) {
+	function loadMoreItems(quantity, back) {
 		var nitems = "";
 		var i = 0;
 
@@ -41,25 +41,31 @@ var rijksSlideshow = (function() {
 
 		var $new_items = $( nitems );
 
-		$items = $items.add($new_items);
-		$slideshow.append($new_items);
+		if (back) {
+			console.log($new_items.find('img').attr("data-id"));
+			$items = $new_items.add($items);
+			console.log("items 0: "+$items.eq( 0 ).find('img').attr("data-id"));
+			$slideshow.prepend($new_items);
+		} else {
+			$items = $items.add($new_items);
+			$slideshow.append($new_items);
+		}
 
-		$new_items.imagesLoaded().always(function(instance) {
-			if ( Modernizr.backgroundsize ) {
-				$new_items.each( function() {
-					var $item = $( this );
-					$item.css( 'background-image', 'url(' + $item.find( 'img' ).attr( 'src' ) + ')' );
-				});
-			}
-		});
+		if ( Modernizr.backgroundsize ) {
+			$new_items.each( function() {
+				var $item = $( this );
+				$item.css( 'background-image', 'url(' + $item.find( 'img' ).attr( 'src' ) + ')' );
+			});
+		}
 	}
 
 	function init( config ) {
 		$items = getFirstItems(lastLimit);
 
 		$slideshow.append( $items )
-		itemsCount = $items.length;
 
+		itemsCount = $items.length;
+		current = middleLimit;
 		// preload the images
 		$slideshow.imagesLoaded()
 			.always( function( instance ) {
@@ -131,71 +137,51 @@ var rijksSlideshow = (function() {
 		// current item
 		var $itemToRemove = null;
 		var $oldItem = $items.eq( current );
+		var addBack = false;
+		var forward = false;
 
 		if( direction === 'next' ) {
+			$itemToRemove = $slideshow.find('li').eq(0);
+			forward = true;
 			navigationsForward += 1;
-			navigationsBackward -= 1;
-
-			if (navigationsForward >= middleLimit) {
-				if (removeAndAdd) {
-					removeAndAdd = false;
-				} else {
-					removeAndAdd = true;
-					$itemToRemove = $items.eq( 0 );
-				}
-				navigationsForward = 0;
-				navigationsBackward = 0;
-			} else if (removeAndAdd) {
-				$itemToRemove = $items.eq( 0 );
-			}
-			current = current < itemsCount - 1 ? ++current : 0;
+			console.log("forward: "+navigationsForward);
+			//current = current < itemsCount - 1 ? ++current : 0;
 		}
 
 		else if( direction === 'prev' ) {
-			navigationsForward -= 1;
-			navigationsBackward += 1;
-
-			if (navigationsBackward >= middleLimit) {
-				if (removeAndAdd) {
-					removeAndAdd = false;
-				} else {
-					removeAndAdd = true;
-					$itemToRemove = $items.eq( $items.length-1 );
-				}
-				navigationsForward = 0;
-				navigationsBackward = 0;
-			} else if (removeAndAdd) {
-				$itemToRemove = $items.eq( $items.length-1 );
-			}
+			//addBack = true;
+			//$itemToRemove = $items.eq( $items.length-1 );
 			current = current > 0 ? --current : itemsCount - 1;
 		}
+
+		if($itemToRemove) {
+	 	   	$items = $items.not($itemToRemove);
+			$slideshow.find('li').eq(0).remove();
+		}
+		
+		if (forward) {
+			if (lastLimit < rijksmuseum.content.length) {
+				var increment = 1;	
+				if (lastLimit + increment < rijksmuseum.content.length) {
+					loadMoreItems(increment, addBack);
+					lastLimit += increment;
+				}	
+			} 
+		}
+
+		var $newItem = $items.eq( current );
+		$oldItem.css( 'opacity', 0 );
+		$newItem.css( 'opacity', 1 );
 
 		var slide_id = $items.eq(current).find('img').attr('data-id');
 		var state = {
 			id: slide_id, 
 	    }
 
-	    var stateToPush = slide_id;
+		var stateToPush = slide_id;
 		history.pushState(state, "Image", stateToPush);
 
-		// new item
-		var $newItem = $items.eq( current );
-
-		// show / hide items
-		$oldItem.css( 'opacity', 0 );
-		$newItem.css( 'opacity', 1 );
-		
-		if (removeAndAdd) {
-			if (lastLimit < rijksmuseum.content.length) {
-				$items = $items.not($itemToRemove);
-				$itemToRemove.remove();
-				var increment = 1;
-				if (lastLimit + increment < rijksmuseum.content.length) {
-					loadMoreItems(increment);
-					lastLimit += increment;
-				}
-			}
-		}
+		console.log("TotalItems: "+$items.length);
 		itemsCount = $items.length;
 	}
 
